@@ -1,0 +1,12 @@
+streamlit
+ipykernel
+python-dotenv
+langchain
+langchain-community
+langchain-core
+langgraph
+langchain_google_genai 
+langchain-nvidia-ai-endpoints 
+langchain_groq
+requests
+wikipedia
