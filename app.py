@@ -283,19 +283,7 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-llm_chat = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
-system_message = (
-    "You are an intelligent AI assistant. "
-    "To use tools, follow this format strictly:\n\n"
-    "Action: <tool name>\n"
-    "Action Input: <tool input>\n\n"
-    "Once you get the response, say:\n"
-    "Observation: <tool output>\n\n"
-    "Finally, conclude with:\n"
-    "Final Answer: <your answer to the user>\n"
-    "Always use this format exactly when calling tools."
-)
-
+llm_chat = ChatNVIDIA(model='meta/llama-3.3-70b-instruct')
 
 # Agent 1: Factual QA
 qa_agent = initialize_agent(
@@ -306,7 +294,6 @@ qa_agent = initialize_agent(
     verbose=True,
     max_iterations=8,                  ##after 8 iteration agent will stop
     early_stopping_method="generate",
-    agent_kwargs={"system_message": system_message},
 )
 
 # Agent 2: Text generator
@@ -314,11 +301,10 @@ visual_agent = initialize_agent(
     tools=[visual_tool],
     llm=llm_chat,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    handle_parsing_errors=True,
     verbose=True,
     max_iterations=2,                  
     early_stopping_method="generate",
-    agent_kwargs={"system_message": system_message}
+
 )
 
 # Agent 3: Image generator
@@ -329,11 +315,9 @@ image_agent = initialize_agent(
     verbose=True,
     max_iterations=2,                  
     early_stopping_method="generate",
-    handle_parsing_errors=True,
-    agent_kwargs={"system_message": system_message}
 )
 
-# #Agent 4 : coder
+#Agent 4 : coder
 code_agent = initialize_agent(
     tools=[llm_code_tool],
     llm=llm_chat,
@@ -341,8 +325,6 @@ code_agent = initialize_agent(
     verbose=True,
     max_iterations=3,                  
     early_stopping_method="generate",
-    handle_parsing_errors=True,
-    agent_kwargs={"system_message": system_message}
 )
 #Agent 5 : serper
 serper_agent = initialize_agent(
@@ -352,8 +334,6 @@ serper_agent = initialize_agent(
     verbose=True,
     max_iterations=3,                  
     early_stopping_method="generate",
-    handle_parsing_errors=True,
-    agent_kwargs={"system_message": system_message}
 )
 
 def route_query(query, callback_manager):
@@ -362,13 +342,14 @@ def route_query(query, callback_manager):
         return serper_agent.run(query[-1]['content'], callbacks=[callback_manager]) # serper list not handle
 
     elif "generate image" in query[-1]['content'].lower() or "draw" in query[-1]['content'].lower() or "create image" in query[-1]['content'].lower():
-        return image_agent.run(query[-1]['content'], callbacks=[callback_manager])
+        return image_agent.run(query, callbacks=[callback_manager])
     elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
-        return visual_agent.run(query[-1]['content'], callbacks=[callback_manager])
+        return visual_agent.run(query, callbacks=[callback_manager])
     elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-        return code_agent.run(query[-1]['content'], callbacks=[callback_manager])
+        return code_agent.run(query, callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
+
 
 
 # agent = initialize_agent(
