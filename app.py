@@ -29,6 +29,7 @@ os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
 os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
 os.environ['GOOGLE_API_KEY'] = st.secrets['GEMINI_API_KEY']
 os.environ['SERPER_API_KEY'] = st.secrets['SERPER_API_KEY']
+os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
 
 st.set_page_config(page_title='Welcome to OmniBot',page_icon='🐋')
 # Add clear button to top right
@@ -38,7 +39,7 @@ with col2:
         if 'messages' in st.session_state:
             del st.session_state['messages']
         st.rerun()
-st.markdown("## 🌊 **OmniBot-AI** — Your Intelligent Assistant for Coding, Creative Tasks, and Meaningful Interactions")
+st.markdown("### 🌊 **OmniBot-AI** — Your Intelligent Assistant for Coding, Creative Tasks, and Meaningful Interactions")
 
 st.sidebar.title("🌟 About OmniBot")
 
@@ -136,7 +137,7 @@ prompt = PromptTemplate(
 llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite')
 chain = prompt|llm
 llm_tool = Tool.from_function(
-    name='conversational tool',
+    name='Conversational tool',
     func=chain.invoke,
     description='A tool for answering logic-based and reasoning questions.and also chat with the user.'
 )
@@ -183,28 +184,28 @@ def gen_img(question: str) -> str:
         return f"Request failed: {str(e)}"
 
 gen_img_tool = Tool.from_function(
-    name="generate_image",
+    name="Generate image",
     func=gen_img,
     description="Generates an image based on the input question or prompt using NVIDIA's Stable Diffusion 3 Medium model."
 )
 
-# llm_code = ChatNVIDIA(model='qwen/qwq-32b')
+llm_code = ChatGroq(model='qwen-qwq-32b')
 
-# template_code = """
-# If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
-# Question:{question}
-# Answer:
-# """
-# prompt_code = PromptTemplate(
-#     input_variables=['question'],
-#     template=template_code
-# )
-# chain_code = prompt_code|llm_code
-# llm_code_tool = Tool.from_function(
-#     name='Expert Coder',
-#     func=chain_code.invoke,
-#     description='A tool for answering code related question.'
-# )
+template_code = """
+If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
+Question:{question}
+Answer:
+"""
+prompt_code = PromptTemplate(
+    input_variables=['question'],
+    template=template_code
+)
+chain_code = prompt_code|llm_code
+llm_code_tool = Tool.from_function(
+    name='Expert Coder',
+    func=chain_code.invoke,
+    description='A tool for answering code related question.'
+)
 
 
 st.sidebar.write(' ')
@@ -319,15 +320,15 @@ image_agent = initialize_agent(
 )
 
 # #Agent 4 : coder
-# code_agent = initialize_agent(
-#     tools=[llm_code_tool],
-#     llm=llm,
-#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-#     verbose=True,
-#     max_iterations=3,                  
-#     early_stopping_method="generate",
-#     handle_parsing_errors=True,
-# )
+code_agent = initialize_agent(
+    tools=[llm_code_tool],
+    llm=llm,
+    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True,
+    max_iterations=3,                  
+    early_stopping_method="generate",
+    handle_parsing_errors=True,
+)
 #Agent 5 : serper
 serper_agent = initialize_agent(
     tools=[serper_tool],
@@ -348,8 +349,8 @@ def route_query(query, callback_manager):
         return image_agent.run(query, callbacks=[callback_manager])
     elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
         return visual_agent.run(query, callbacks=[callback_manager])
-    # elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-    #     return code_agent.run(query, callbacks=[callback_manager])
+    elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
+        return code_agent.run(query, callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
 
