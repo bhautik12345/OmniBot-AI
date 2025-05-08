@@ -346,7 +346,7 @@ def route_query(query, callback_manager):
     elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
         return visual_agent.run(query, callbacks=[callback_manager])
     elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-        return code_agent.run(query, callbacks=[callback_manager])
+        return code_agent.run(query[-1]['content'], callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
 
