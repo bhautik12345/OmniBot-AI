@@ -188,8 +188,7 @@ gen_img_tool = Tool.from_function(
     description="Generates an image based on the input question or prompt using NVIDIA's Stable Diffusion 3 Medium model."
 )
 
-# llm_code = ChatGroq(model='qwen-qwq-32b',api_key='--')
-llm_code = ChatNVIDIA(model='qwen/qwen2.5-coder-32b-instruct')
+llm_code = ChatNVIDIA(model='deepseek-ai/deepseek-r1-distill-qwen-32b')
 
 template_code = """
 If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
