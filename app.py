@@ -203,7 +203,7 @@ prompt_code = PromptTemplate(
 chain_code = prompt_code|llm_code
 llm_code_tool = Tool.from_function(
     name='Expert Coder',
-    func=chain_code.invoke,
+    func=chain_code.run,
     description='A tool for answering code related question.'
 )
 
