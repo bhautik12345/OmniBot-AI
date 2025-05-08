@@ -322,9 +322,11 @@ code_agent = initialize_agent(
     tools=[llm_code_tool],
     llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    handle_parsing_errors=True,
     verbose=True,
     max_iterations=3,                  
     early_stopping_method="generate",
+    
 )
 #Agent 5 : serper
 serper_agent = initialize_agent(
