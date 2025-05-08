@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+from langchain_core.output_parsers import stroutputparser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_groq import ChatGroq
@@ -16,7 +17,6 @@ from dotenv import load_dotenv
 import requests
 from langchain.tools import tool
 import base64
-from langchain.memory import ConversationBufferWindowMemory
 load_dotenv()
 
 # os.environ['TAVILY_API_KEY'] = os.getenv('TAVILY_API_KEY')
@@ -117,14 +117,18 @@ serper_tool = Tool.from_function(
     description='Use the Google Serper API to search for places, news, images, videos, or perform an image search from a URL.'
 )
 
+
 template = """
 You are Omnibot-AI, an intelligent assistant developed by **Bhautik Vadaliya**.
 
+Instructions:
 - Always introduce yourself as: *"I am Omnibot-AI, developed by Bhautik Vadaliya."*
 - Never mention Google, OpenAI, or any other company as your creator.
-- Engage in helpful, logical, and friendly conversation.
+- Respond in a helpful, logical, and friendly manner.
+- Format responses clearly, using bullet points where appropriate.
 - If a tool fails, rely on your own knowledge.
-- Respond in a clear, detailed, point-wise format.
+- If the question is **code-related**, answer like an expert coder (NLP, AI, ML, web dev, etc.), and include code snippets and explanations.
+- Otherwise, respond conversationally as a smart assistant.
 
 User: {question}
 Omnibot-AI:
@@ -134,13 +138,22 @@ prompt = PromptTemplate(
     input_variables=['question'],
     template=template
 )
+
+# Chain setup
 llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite')
-chain = prompt|llm
+output_parser = StrOutputParser()  # Keeps output clean
+chain = prompt | llm | output_parser
+
+# Tool definition
 llm_tool = Tool.from_function(
-    name='Conversational tool',
+    name='Omnibot-AI Assistant',
     func=chain.invoke,
-    description='A tool for answering logic-based and reasoning questions.and also chat with the user.'
+    description=(
+        'An assistant that answers both general and code-related questions. '
+        'Responds with detailed, structured information and helpful explanations.'
+    )
 )
+
 
 
 # @tool("generate_image", return_direct=True)
@@ -189,24 +202,24 @@ gen_img_tool = Tool.from_function(
     description="Generates an image based on the input question or prompt using NVIDIA's Stable Diffusion 3 Medium model."
 )
 
-llm_code = ChatGroq(model='qwen-qwq-32b')
+# llm_code = ChatGroq(model='qwen-qwq-32b')
 
-template_code = """
-You are a coding assistant. Given the user's question, return **only the answer or code**. Do not include explanations or markdown formatting.
+# template_code = """
+# You are a coding assistant. Given the user's question, return **only the answer or code**. Do not include explanations or markdown formatting.
 
-Question: {question}
-Answer:
-"""
-prompt_code = PromptTemplate(
-    input_variables=['question'],
-    template=template_code
-)
-chain_code = prompt_code|llm_code
-llm_code_tool = Tool.from_function(
-    name='Expert Coder',
-    func=chain_code.invoke,
-    description='A tool for answering code related question.'
-)
+# Question: {question}
+# Answer:
+# """
+# prompt_code = PromptTemplate(
+#     input_variables=['question'],
+#     template=template_code
+# )
+# chain_code = prompt_code|llm_code
+# llm_code_tool = Tool.from_function(
+#     name='Expert Coder',
+#     func=chain_code.invoke,
+#     description='A tool for answering code related question.'
+# )
 
 
 st.sidebar.write(' ')
@@ -318,17 +331,17 @@ image_agent = initialize_agent(
     early_stopping_method="generate",
 )
 
-#Agent 4 : coder
-code_agent = initialize_agent(
-    tools=[llm_code_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    handle_parsing_errors=True,
-    verbose=True,
-    max_iterations=3,                  
-    early_stopping_method="generate",
+# #Agent 4 : coder
+# code_agent = initialize_agent(
+#     tools=[llm_code_tool],
+#     llm=llm,
+#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+#     handle_parsing_errors=True,
+#     verbose=True,
+#     max_iterations=3,                  
+#     early_stopping_method="generate",
     
-)
+# )
 #Agent 5 : serper
 serper_agent = initialize_agent(
     tools=[serper_tool],
@@ -348,8 +361,8 @@ def route_query(query, callback_manager):
         return image_agent.run(query, callbacks=[callback_manager])
     elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
         return visual_agent.run(query, callbacks=[callback_manager])
-    elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-        return code_agent.run(query[-1]['content'], callbacks=[callback_manager])
+    # elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
+    #     return code_agent.run(query[-1]['content'], callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
 
