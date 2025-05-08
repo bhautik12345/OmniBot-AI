@@ -297,12 +297,12 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-# llm_chat = ChatNVIDIA(model='meta/llama-3.3-70b-instruct')
+llm_chat = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
 
 # Agent 1: Factual QA
 qa_agent = initialize_agent(
     tools=[wiki_tool, tavily_tool, llm_tool],
-    llm=llm,
+    llm=llm_chat,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     handle_parsing_errors=True,
     verbose=True,
@@ -313,7 +313,7 @@ qa_agent = initialize_agent(
 # Agent 2: Text generator
 visual_agent = initialize_agent(
     tools=[visual_tool],
-    llm=llm,
+    llm=llm_chat,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=2,                  
@@ -324,7 +324,7 @@ visual_agent = initialize_agent(
 # Agent 3: Image generator
 image_agent = initialize_agent(
     tools=[gen_img_tool],
-    llm=llm,
+    llm=llm_chat,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=2,                  
@@ -345,7 +345,7 @@ image_agent = initialize_agent(
 #Agent 5 : serper
 serper_agent = initialize_agent(
     tools=[serper_tool],
-    llm=llm,
+    llm=llm_chat,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=3,                  
@@ -366,17 +366,6 @@ def route_query(query, callback_manager):
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
 
-
-
-# agent = initialize_agent(
-#     tools=[serper_tool,tavily_tool,visual_tool,llm_tool,wiki_tool,gen_img_tool,llm_code_tool],
-#     llm=llm_chat,
-#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-#     handle_parsing_errors=True,
-#     verbose=True,
-#     max_iterations=8,                  ##after 8 iteration agent will stop
-#     early_stopping_method="generate"     ## if agent stop after llm_chat provide the answer according to knowledge
-# )
 
 #------------------------------------------------------ Let's build chatbot---------------------------------
 
