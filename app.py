@@ -29,7 +29,7 @@ os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
 os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
 os.environ['GOOGLE_API_KEY'] = st.secrets['GEMINI_API_KEY']
 os.environ['SERPER_API_KEY'] = st.secrets['SERPER_API_KEY']
-os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
+# os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
 
 st.set_page_config(page_title='Welcome to OmniBot',page_icon='🐋')
 # Add clear button to top right
