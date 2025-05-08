@@ -301,6 +301,7 @@ visual_agent = initialize_agent(
     tools=[visual_tool],
     llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    handle_parsing_errors=True,
     verbose=True,
     max_iterations=2,                  
     early_stopping_method="generate",
@@ -315,6 +316,7 @@ image_agent = initialize_agent(
     verbose=True,
     max_iterations=2,                  
     early_stopping_method="generate",
+    handle_parsing_errors=True,
 )
 
 #Agent 4 : coder
@@ -325,6 +327,7 @@ code_agent = initialize_agent(
     verbose=True,
     max_iterations=3,                  
     early_stopping_method="generate",
+    handle_parsing_errors=True,
 )
 #Agent 5 : serper
 serper_agent = initialize_agent(
@@ -334,6 +337,7 @@ serper_agent = initialize_agent(
     verbose=True,
     max_iterations=3,                  
     early_stopping_method="generate",
+    handle_parsing_errors=True,
 )
 
 def route_query(query, callback_manager):
