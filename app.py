@@ -188,23 +188,23 @@ gen_img_tool = Tool.from_function(
     description="Generates an image based on the input question or prompt using NVIDIA's Stable Diffusion 3 Medium model."
 )
 
-llm_code = ChatNVIDIA(model='deepseek-ai/deepseek-r1-distill-qwen-32b')
+# llm_code = ChatNVIDIA(model='qwen/qwq-32b')
 
-template_code = """
-If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
-Question:{question}
-Answer:
-"""
-prompt_code = PromptTemplate(
-    input_variables=['question'],
-    template=template_code
-)
-chain_code = prompt_code|llm_code
-llm_code_tool = Tool.from_function(
-    name='Expert Coder',
-    func=chain_code.invoke,
-    description='A tool for answering code related question.'
-)
+# template_code = """
+# If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
+# Question:{question}
+# Answer:
+# """
+# prompt_code = PromptTemplate(
+#     input_variables=['question'],
+#     template=template_code
+# )
+# chain_code = prompt_code|llm_code
+# llm_code_tool = Tool.from_function(
+#     name='Expert Coder',
+#     func=chain_code.invoke,
+#     description='A tool for answering code related question.'
+# )
 
 
 st.sidebar.write(' ')
@@ -282,7 +282,7 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-llm_chat = ChatNVIDIA(model='meta/llama-3.3-70b-instruct')
+llm_chat = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
 
 # Agent 1: Factual QA
 qa_agent = initialize_agent(
@@ -318,16 +318,16 @@ image_agent = initialize_agent(
     handle_parsing_errors=True,
 )
 
-#Agent 4 : coder
-code_agent = initialize_agent(
-    tools=[llm_code_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-    max_iterations=3,                  
-    early_stopping_method="generate",
-    handle_parsing_errors=True,
-)
+# #Agent 4 : coder
+# code_agent = initialize_agent(
+#     tools=[llm_code_tool],
+#     llm=llm,
+#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+#     verbose=True,
+#     max_iterations=3,                  
+#     early_stopping_method="generate",
+#     handle_parsing_errors=True,
+# )
 #Agent 5 : serper
 serper_agent = initialize_agent(
     tools=[serper_tool],
@@ -348,8 +348,8 @@ def route_query(query, callback_manager):
         return image_agent.run(query, callbacks=[callback_manager])
     elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
         return visual_agent.run(query, callbacks=[callback_manager])
-    elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-        return code_agent.run(query, callbacks=[callback_manager])
+    # elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
+    #     return code_agent.run(query, callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
 
