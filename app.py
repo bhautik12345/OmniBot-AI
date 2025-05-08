@@ -26,10 +26,10 @@ load_dotenv()
 
 # Set environment variables from Streamlit secrets
 os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
-os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
+# os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
 os.environ['GOOGLE_API_KEY'] = st.secrets['GEMINI_API_KEY']
 os.environ['SERPER_API_KEY'] = st.secrets['SERPER_API_KEY']
-# os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
+os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
 
 st.set_page_config(page_title='Welcome to OmniBot',page_icon='🐋')
 # Add clear button to top right
@@ -141,8 +141,8 @@ prompt = PromptTemplate(
 
 # Chain setup
 llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite')
-output_parser = StrOutputParser()  # Keeps output clean
-chain = prompt | llm | output_parser
+# output_parser = StrOutputParser()  # Keeps output clean
+chain = prompt | llm
 
 # Tool definition
 llm_tool = Tool.from_function(
@@ -297,7 +297,7 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-llm_chat = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
+llm_chat = ChatGroq(model='meta-llama/llama-4-scout-17b-16e-instruct')
 
 # Agent 1: Factual QA
 qa_agent = initialize_agent(
