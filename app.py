@@ -192,8 +192,9 @@ gen_img_tool = Tool.from_function(
 llm_code = ChatGroq(model='qwen-qwq-32b')
 
 template_code = """
-If the user's question is code-related, you are an expert in Natural Language Processing (NLP), Code Generation and Debugging, Machine Learning and AI, and Web Development. Your task is to understand the user's question, provide accurate and detailed code snippets, and offer explanations and debugging assistance as needed.
-Question:{question}
+You are a coding assistant. Given the user's question, return **only the answer or code**. Do not include explanations or markdown formatting.
+
+Question: {question}
 Answer:
 """
 prompt_code = PromptTemplate(
@@ -203,7 +204,7 @@ prompt_code = PromptTemplate(
 chain_code = prompt_code|llm_code
 llm_code_tool = Tool.from_function(
     name='Expert Coder',
-    func=chain_code.run,
+    func=chain_code.invoke,
     description='A tool for answering code related question.'
 )
 
