@@ -297,12 +297,12 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-llm_chat = ChatGroq(model='meta-llama/llama-4-scout-17b-16e-instruct')
+# llm_chat = ChatGroq(model='meta-llama/llama-4-scout-17b-16e-instruct')
 
 # Agent 1: Factual QA
 qa_agent = initialize_agent(
     tools=[wiki_tool, tavily_tool, llm_tool],
-    llm=llm_chat,
+    llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     handle_parsing_errors=True,
     verbose=True,
@@ -313,7 +313,7 @@ qa_agent = initialize_agent(
 # Agent 2: Text generator
 visual_agent = initialize_agent(
     tools=[visual_tool],
-    llm=llm_chat,
+    llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=2,                  
@@ -324,7 +324,7 @@ visual_agent = initialize_agent(
 # Agent 3: Image generator
 image_agent = initialize_agent(
     tools=[gen_img_tool],
-    llm=llm_chat,
+    llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=2,                  
@@ -345,7 +345,7 @@ image_agent = initialize_agent(
 #Agent 5 : serper
 serper_agent = initialize_agent(
     tools=[serper_tool],
-    llm=llm_chat,
+    llm=llm,
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=3,                  
