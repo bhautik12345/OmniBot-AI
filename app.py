@@ -149,7 +149,7 @@ chain = prompt | llm
 # Tool definition
 llm_tool = Tool.from_function(
     name='Omnibot-AI Assistant',
-    func=chain.invoke,
+    func=lambda q: chain.invoke({"question": q}).content,
     description=(
         'An assistant that answers both general and code-related questions. '
         'Responds with detailed, structured information and helpful explanations.'
