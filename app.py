@@ -296,10 +296,9 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-@st.cache_resource
-def build_agent(_tools, llm_model=llm, max_iter=3):
+def build_agent(tools, llm_model=llm, max_iter=3):
     return initialize_agent(
-        tools=_tools,
+        tools=tools,
         llm=llm_model,
         agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,
