@@ -186,7 +186,7 @@ def gen_img(question: str) -> str:
             image_bytes = base64.b64decode(image_data)
 
               # Display image directly from memory
-            st.image(io.BytesIO(image_bytes), caption="Generated Image", use_column_width=True)
+            st.image(io.BytesIO(image_bytes), caption="Generated Image", use_container_width=True)
             return "Image generated successfully."
 
         else:
