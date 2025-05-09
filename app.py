@@ -297,74 +297,32 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
-# llm_chat = ChatGroq(model='meta-llama/llama-4-scout-17b-16e-instruct')
-
-# Agent 1: Factual QA
-qa_agent = initialize_agent(
-    tools=[wiki_tool, tavily_tool, llm_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    handle_parsing_errors=True,
-    verbose=True,
-    max_iterations=8,                  ##after 8 iteration agent will stop
-    early_stopping_method="generate",
-)
-
-# Agent 2: Text generator
-visual_agent = initialize_agent(
-    tools=[visual_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-    max_iterations=2,                  
-    early_stopping_method="generate",
-
-)
-
-# Agent 3: Image generator
-image_agent = initialize_agent(
-    tools=[gen_img_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-    max_iterations=2,                  
-    early_stopping_method="generate",
-)
-
-# #Agent 4 : coder
-# code_agent = initialize_agent(
-#     tools=[llm_code_tool],
-#     llm=llm,
-#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-#     handle_parsing_errors=True,
-#     verbose=True,
-#     max_iterations=3,                  
-#     early_stopping_method="generate",
-    
-# )
-#Agent 5 : serper
-serper_agent = initialize_agent(
-    tools=[serper_tool],
-    llm=llm,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-    max_iterations=3,                  
-    early_stopping_method="generate",
-)
+def build_agent(tools, llm_model=llm, max_iter=3):
+    return initialize_agent(
+        tools=tools,
+        llm=llm_model,
+        agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+        verbose=False,
+        max_iterations=max_iter,
+        early_stopping_method="generate",
+    )
+qa_agent = build_agent([wiki_tool, tavily_tool, llm_tool], max_iter=5)
+visual_agent = build_agent([visual_tool], max_iter=2)
+image_agent = build_agent([gen_img_tool], max_iter=2)
+serper_agent = build_agent([serper_tool], max_iter=3)
 
 def route_query(query, callback_manager):
-    # If query is related to Serper (based on the keyword in the latest query)
-    if "search" in query[-1]['content'].lower() or "find" in query[-1]['content'].lower() or "look up" in query[-1]['content'].lower():
-        return serper_agent.run(query[-1]['content'], callbacks=[callback_manager]) # serper list not handle
-
-    elif "generate image" in query[-1]['content'].lower() or "draw" in query[-1]['content'].lower() or "create image" in query[-1]['content'].lower():
+    def route_query(query, callback_manager):
+    content = query[-1]['content'].lower()
+    if any(k in content for k in ["search", "find", "look up"]):
+        return serper_agent.run(content, callbacks=[callback_manager])
+    elif any(k in content for k in ["generate image", "draw", "create image"]):
         return image_agent.run(query, callbacks=[callback_manager])
-    elif "provided image" in query[-1]['content'].lower() or "describe" in query[-1]['content'].lower() or "show image" in query[-1]['content'].lower() or "uploaded image" in query[-1]['content'].lower() or "analyze image" in query[-1]['content'].lower():
+    elif any(k in content for k in ["provided image", "describe", "show image", "uploaded image", "analyze image"]):
         return visual_agent.run(query, callbacks=[callback_manager])
-    # elif "code" in query[-1]['content'].lower() or "program" in query[-1]['content'].lower() or "script" in query[-1]['content'].lower():
-    #     return code_agent.run(query[-1]['content'], callbacks=[callback_manager])
     else:
         return qa_agent.run(query, callbacks=[callback_manager])
+
 
 
 #------------------------------------------------------ Let's build chatbot---------------------------------
