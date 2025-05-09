@@ -295,8 +295,9 @@ visual_tool = Tool.from_function(
 
 
 #---------------------------------------------------------Build Agent-------------------
+final_llm = llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
 
-def build_agent(tools, llm_model=llm, max_iter=3):
+def build_agent(tools, llm_model=final_llm, max_iter=3):
     return initialize_agent(
         tools=tools,
         llm=llm_model,
