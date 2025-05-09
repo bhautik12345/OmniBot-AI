@@ -1,4 +1,5 @@
 import os
+import io
 import streamlit as st
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -26,10 +27,11 @@ load_dotenv()
 
 # Set environment variables from Streamlit secrets
 os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
-# os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
+os.environ['NVIDIA_API_KEY'] = st.secrets['NVIDIA_API_KEY']
 os.environ['GOOGLE_API_KEY'] = st.secrets['GEMINI_API_KEY']
 os.environ['SERPER_API_KEY'] = st.secrets['SERPER_API_KEY']
-os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
+# os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
+nvidia_api_key = st.secrets['NVIDIA_API_KEY']
 
 st.set_page_config(page_title='Welcome to OmniBot',page_icon='🐋')
 # Add clear button to top right
@@ -156,13 +158,12 @@ llm_tool = Tool.from_function(
 
 
 
-# @tool("generate_image", return_direct=True)
 def gen_img(question: str) -> str:
     """Generates an image using the prompt provided in the question string."""
     invoke_url = "https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-3-medium"
 
     headers = {
-        "Authorization": "Bearer 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",
+        "Authorization": f"Bearer {nvidia_api_key}",
         "Accept": "application/json",
     }
 
@@ -184,12 +185,10 @@ def gen_img(question: str) -> str:
             image_data = response_body["image"]
             image_bytes = base64.b64decode(image_data)
 
-            filename = "generated_image.png"
-            with open(filename, "wb") as f:
-                f.write(image_bytes)
-                st.image(filename)
+              # Display image directly from memory
+            st.image(io.BytesIO(image_bytes), caption="Generated Image", use_column_width=True)
+            return "Image generated successfully."
 
-            return f"Image saved as '{filename}'"
         else:
             return "Error: No image data found in the response."
 
@@ -246,7 +245,7 @@ def visual_qa(question: str) -> str:
             stream = False  # Set to True if you want streamed output
 
             headers = {
-                "Authorization": "Bearer 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",  # Replace this
+                "Authorization": f"Bearer {nvidia_api_key}",  
                 "Accept": "text/event-stream" if stream else "application/json"
             }
 
@@ -297,12 +296,13 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 
+@st.cache_resource
 def build_agent(tools, llm_model=llm, max_iter=3):
     return initialize_agent(
         tools=tools,
         llm=llm_model,
         agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=False,
+        verbose=True,
         max_iterations=max_iter,
         early_stopping_method="generate",
     )
