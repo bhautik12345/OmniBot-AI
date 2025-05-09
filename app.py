@@ -312,7 +312,6 @@ image_agent = build_agent([gen_img_tool], max_iter=2)
 serper_agent = build_agent([serper_tool], max_iter=3)
 
 def route_query(query, callback_manager):
-    def route_query(query, callback_manager):
     content = query[-1]['content'].lower()
     if any(k in content for k in ["search", "find", "look up"]):
         return serper_agent.run(content, callbacks=[callback_manager])
