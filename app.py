@@ -296,7 +296,7 @@ visual_tool = Tool.from_function(
 
 #---------------------------------------------------------Build Agent-------------------
 # final_llm = llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
-final_llm = ChatNVIDIA(model='meta/llama-4-scout-17b-16e-instruct')
+final_llm = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
 
 def build_agent(tools, llm_model=final_llm, max_iter=3):
     return initialize_agent(
