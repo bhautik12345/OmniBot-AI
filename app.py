@@ -303,6 +303,7 @@ def build_agent(tools, llm_model=final_llm, max_iter=3):
         tools=tools,
         llm=llm_model,
         agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+        handle_parsing_errors=True,
         verbose=True,
         max_iterations=max_iter,
         early_stopping_method="generate",
