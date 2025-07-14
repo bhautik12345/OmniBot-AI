@@ -295,7 +295,8 @@ visual_tool = Tool.from_function(
 
 
 #---------------------------------------------------------Build Agent-------------------
-final_llm = llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
+# final_llm = llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
+final_llm = ChatGroq()
 # final_llm = ChatNVIDIA(model='nvidia/llama-3.1-nemotron-ultra-253b-v1')
 
 def build_agent(tools, llm_model=final_llm, max_iter=3):
@@ -308,7 +309,7 @@ def build_agent(tools, llm_model=final_llm, max_iter=3):
         max_iterations=max_iter,
         early_stopping_method="generate",
     )
-qa_agent = build_agent([wiki_tool, tavily_tool, llm_tool], max_iter=5)
+qa_agent = build_agent([wiki_tool, tavily_tool, llm_tool], max_iter=3)
 visual_agent = build_agent([visual_tool], max_iter=2)
 image_agent = build_agent([gen_img_tool], max_iter=2)
 serper_agent = build_agent([serper_tool], max_iter=3)
